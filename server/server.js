@@ -2,9 +2,8 @@ var logging = require("./modules/logging");
 
 var uuid = require("uuid");
 var crypto = require("crypto");
-var node_cryptojs = require('node-cryptojs-aes');
-var aes = node_cryptojs.CryptoJS.AES;
-var aesJSON = node_cryptojs.JsonFormatter;
+var CryptoJS = require("node-cryptojs-aes").CryptoJS;
+var JsonFormatter = require("node-cryptojs-aes").JsonFormatter;
 
 var db = require("./modules/db");
 
@@ -23,16 +22,17 @@ io.sockets.on("connection", function(socket)
 
 	socket.on("challenge", function(challenge)
 	{
-		logging.verbose("Received challenge request for user [%s]", challenge.username);
+		var username = challenge.username;
+		logging.verbose("Received challenge request for user [%s]", username);
 
-		db.users.model.findOne({ username: challenge.username }, function(error, user)
+		db.users.model.findOne({ username: username }, function(error, user)
 		{
 			if(error || !user)
 			{
-				logging.error("Requested user [%s] not found.  Sending some bullshit data instead.", challenge.username);
+				logging.error("Requested user [%s] not found.  Sending some bullshit data instead.", username);
 
 				var salt = uuid.v4().replace("-", "");
-				var cipher = aes.encrypt(crypto.randomBytes(1024).toString("base64"), crypto.randomBytes(1024).toString("base64"), { format: aesJSON }).toString();
+				var cipher = CryptoJS.AES.encrypt(crypto.randomBytes(1024).toString("base64"), crypto.randomBytes(1024).toString("base64"), { format: JsonFormatter }).toString();
 				socket.emit("challenge", { salt: salt, challenge: cipher });
 			}
 			else
@@ -40,11 +40,14 @@ io.sockets.on("connection", function(socket)
 				if(user)
 				{
 					var challenge = crypto.randomBytes(1024).toString("base64");
-					var cipher = aes.encrypt(challenge, user.password, { format: aesJSON }).toString();
+					var cipher = CryptoJS.AES.encrypt(challenge, user.password, { format: JsonFormatter }).toString();
 
 					user.auth.challenge = challenge;
 					user.auth.sent = Date.now();
-					socket.emit("challenge", { salt: user.salt, challenge: cipher });
+					user.save(function()
+					{
+						socket.emit("challenge", { salt: user.salt, challenge: cipher });
+					});
 				}
 			}
 		});
