@@ -80,8 +80,15 @@ io.sockets.on("connection", function(socket)
 				key = user.password;
 
 				var plaintext = CryptoJS.AES.decrypt(response, key, { format: JsonFormatter }).toString(CryptoJS.enc.Utf8);
-				console.log(plaintext);
+
+				var expected = user.auth.challenge.split("").reverse().join("");
+				if(plaintext == expected)
+				{
+					authenticated = true;
+				}
 			}
+
+			socket.emit("authenticate", { authenticated: authenticated, token: token });
 		});
 	});
 });
