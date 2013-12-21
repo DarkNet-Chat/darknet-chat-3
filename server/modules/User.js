@@ -1,3 +1,10 @@
+var logging = require("./logging");
+var db = require("./db");
+
+var uuid = require("uuid");
+var crypto = require("crypto");
+var CryptoJS = require("node-cryptojs-aes").CryptoJS;
+var JsonFormatter = require("node-cryptojs-aes").JsonFormatter;
 
 exports.User = function()
 {
