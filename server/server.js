@@ -79,12 +79,9 @@ io.sockets.on("connection", function(socket)
 				console.log(user.auth.sent);
 				key = user.password;
 
-				var plaintext = CryptoJS.AES.decrypt(response, key, { format: JsonFormatter }).toString(CryptoJS.enc.Base64);
+				var plaintext = CryptoJS.AES.decrypt(response, key, { format: JsonFormatter }).toString(CryptoJS.enc.Utf8);
 				console.log(plaintext);
 			}
-
-			var cipher = CryptoJS.AES.encrypt(challenge, key, { format: JsonFormatter }).toString();
-			socket.emit("challenge", { salt: salt, challenge: cipher });
 		});
 	});
 });
