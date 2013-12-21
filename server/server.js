@@ -33,26 +33,22 @@ io.sockets.on("connection", function(socket)
 
 			if(error || !user)
 			{
-				logging.error("Error fetching user", error);
+				if(error)
+					logging.error("Error fetching user", error);
 				logging.warn("Requested user [%s] not found.  Sending fake data instead.", username);
 			}
 			else
 			{
-				if(user)
+				key = user.password;
+				salt = user.salt;
+
+				var challenge = crypto.randomBytes(1024).toString("base64");
+
+				user.auth.challenge = challenge;
+				user.auth.sent = Date.now();
+				user.save(function()
 				{
-					key = user.password;
-					salt = user.salt;
-
-					var challenge = crypto.randomBytes(1024).toString("base64");
-
-					user.auth.challenge = challenge;
-					user.auth.sent = Date.now();
-					user.save(function()
-					{
-					});
-				}
-				else
-					logging.warn("Requested user [%s] not found.  Sending fake data instead.", username);
+				});
 			}
 
 			var cipher = CryptoJS.AES.encrypt(challenge, key, { format: JsonFormatter }).toString();
@@ -62,6 +58,33 @@ io.sockets.on("connection", function(socket)
 
 	socket.on("authenticate", function(auth)
 	{
-		console.log(auth);
+		var username = auth.username;
+		var response = auth.response;
+
+		var token = uuid.v4();
+		var authenticated = false;
+
+		logging.verbose("Received authentication response for user [%s]", username);
+
+		db.users.model.findOne({ username: username }, function(error, user)
+		{
+			if(error || !user)
+			{
+				if(error)
+					logging.error("Error fetching user", error);
+				logging.warn("Requested user [%s] not found.  Denying authentication.", username);
+			}
+			else
+			{
+				console.log(user.auth.sent);
+				key = user.password;
+
+				var plaintext = CryptoJS.AES.decrypt(response, key, { format: JsonFormatter }).toString(CryptoJS.enc.Base64);
+				console.log(plaintext);
+			}
+
+			var cipher = CryptoJS.AES.encrypt(challenge, key, { format: JsonFormatter }).toString();
+			socket.emit("challenge", { salt: salt, challenge: cipher });
+		});
 	});
 });
