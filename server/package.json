@@ -1,0 +1,16 @@
+{
+	"name": "darknet-chat",
+	"preferGlobal": false,
+	"version": "3.0.0",
+	"description": "DarkNet Chat Server",
+	"author": "darkcooger <cooger@darkcooger.net",
+	"dependencies": {
+		"mongoose"		: "3.8.3",
+		"node-cryptojs-aes"	: "0.3.9",
+		"socket.io"		: "0.9.16",
+		"uuid"			: "1.4.1",
+		"winston"		: "0.7.2",
+		"winston-mongodb"	: "0.4.3"
+	}
+}
+

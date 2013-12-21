@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="/server/socket.io.js"></script>
+	<script type="text/javascript">
+
+	function launch()
+	{
+		var socket = io.connect("ws://chat.mudz.me/", { resource: "server" });
+		socket.on("error", function(e)
+		{
+			console.log("ERROR");
+			console.log(e);
+		});
+		socket.on("connect", function()
+		{
+			console.log("CONNECTED");
+
+			socket.on("challenge", function(challenge)
+			{
+				console.log(challenge);
+			});
+
+			socket.emit("challenge", { username: "adarkcooger" });
+		});
+		socket.on("disconnect", function(d)
+		{
+			console.log("DISCONNECT");
+			console.log(d);
+		});
+	}
+
+	</script>
+</head>
+<body onload="launch()">
+</body>
+</html>
