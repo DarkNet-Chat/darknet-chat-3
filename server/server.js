@@ -74,7 +74,10 @@ io.sockets.on("connection", function(socket)
 					logging.error("Error fetching user", error);
 				logging.warn("Requested user [%s] not found.  Denying authentication.", username);
 			}
-			else
+			else if(Date.now() - user.auth.sent.getTime() > 3000)
+			{
+				logging.warn("Authentication challenge expired.")
+			}
 			{
 				console.log(user.auth.sent);
 				key = user.password;
@@ -85,6 +88,11 @@ io.sockets.on("connection", function(socket)
 				if(plaintext == expected)
 				{
 					authenticated = true;
+					user.auth.token = token;
+					var expiry = new Date();
+					expiry.setDate(expiry.getDate() + 10);
+					user.auth.expiry = expiry;
+					user.save();
 				}
 			}
 

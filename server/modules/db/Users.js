@@ -11,7 +11,8 @@ var schema = new mongoose.Schema({
 	auth: {
 		challenge: String,
 		sent: { type: Date, default: Date.now },
-		token: String
+		token: String,
+		expiry: { type: Date, default: 0 }
 	}
 });
 
