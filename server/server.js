@@ -27,29 +27,36 @@ io.sockets.on("connection", function(socket)
 
 		db.users.model.findOne({ username: username }, function(error, user)
 		{
+			var key = crypto.randomBytes(1024).toString("base64");
+			var salt = uuid.v4().replace("-", "").toUpperCase();
+			var challenge = crypto.randomBytes(1024).toString("base64");
+
 			if(error || !user)
 			{
-				logging.error("Requested user [%s] not found.  Sending some bullshit data instead.", username);
-
-				var salt = uuid.v4().replace("-", "");
-				var cipher = CryptoJS.AES.encrypt(crypto.randomBytes(1024).toString("base64"), crypto.randomBytes(1024).toString("base64"), { format: JsonFormatter }).toString();
-				socket.emit("challenge", { salt: salt, challenge: cipher });
+				logging.error("Error fetching user", error);
+				logging.warn("Requested user [%s] not found.  Sending fake data instead.", username);
 			}
 			else
 			{
 				if(user)
 				{
+					key = user.password;
+					salt = user.salt;
+
 					var challenge = crypto.randomBytes(1024).toString("base64");
-					var cipher = CryptoJS.AES.encrypt(challenge, user.password, { format: JsonFormatter }).toString();
 
 					user.auth.challenge = challenge;
 					user.auth.sent = Date.now();
 					user.save(function()
 					{
-						socket.emit("challenge", { salt: user.salt, challenge: cipher });
 					});
 				}
+				else
+					logging.warn("Requested user [%s] not found.  Sending fake data instead.", username);
 			}
+
+			var cipher = CryptoJS.AES.encrypt(challenge, key, { format: JsonFormatter }).toString();
+			socket.emit("challenge", { salt: salt, challenge: cipher });
 		});
 	});
 
