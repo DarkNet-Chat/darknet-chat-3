@@ -101,6 +101,7 @@ var Chat = function()
 							_$scope.auth.visible = false;
 						});
 
+					socket.emit("me");
 				}
 				else if(user.method == "credentials")
 				{

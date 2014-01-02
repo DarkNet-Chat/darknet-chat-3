@@ -10,6 +10,8 @@ exports.User = function()
 {
 	return function(socket)
 	{
+		var _token = null;
+
 		socket.on("token", function(token)
 		{
 			logging.verbose("Received authentication attempt with token [%s]", token);
@@ -31,6 +33,7 @@ exports.User = function()
 					{
 						authenticated = true;
 						realToken = user.auth.token;
+						_token = user.auth.token;
 
 						var expiry = new Date();
 						expiry.setDate(expiry.getDate() + 10);
@@ -118,6 +121,7 @@ exports.User = function()
 						if(user.auth && user.auth.expiry && Date.now() < user.auth.expiry.getTime())
 							token = user.auth.token;
 
+						_token = token;
 
 						authenticated = true;
 						user.auth.token = token;
@@ -132,6 +136,27 @@ exports.User = function()
 
 				socket.emit("authenticate", { authenticated: authenticated, method: "credentials", token: token });
 			});
+		});
+
+		socket.on("me", function()
+		{
+			logging.verbose("Getting own information for token [%s]", _token);
+			db.users.model.findOne({ "auth.token": _token }, function(error, user)
+			{
+				if(error || !user)
+				{
+					if(error)
+						logging.error("Error getting user for token [%s]", _token, error);
+					logging.warn("Could not get user for token [%s]", _token);
+				}
+				else
+				{
+					var u = user.toObject();
+					delete u.auth;
+					delete u.password;
+					delete u.salt;
+				}
+			})
 		});
 	}
 }();
