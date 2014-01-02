@@ -13,6 +13,9 @@ var schema = new mongoose.Schema({
 		sent: { type: Date, default: Date.now },
 		token: String,
 		expiry: { type: Date, default: 0 }
+	},
+	preferences: {
+		afkMessage: String
 	}
 });
 
