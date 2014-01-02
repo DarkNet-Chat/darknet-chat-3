@@ -4,7 +4,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>DarkNet Chat</title>
 	<!--script type="text/javascript" src="http://chat.mudz.me/server/socket.io.js"></script-->
-	<script type="text/javascript" src="http://172.16.70.130:9940/server/socket.io.js"></script>
+	<script type="text/javascript" src="http://192.168.0.56:9940/server/socket.io.js"></script>
 	<script type="text/javascript" src="js/crypto.js"></script>
 	<script type="text/javascript" src="js/jq-ang-bs.js"></script>
 	<script type="text/javascript" src="js/main.js"></script>
@@ -33,14 +33,21 @@
 	</span>
 
 	<span class="right">
-		<div ng-click="click('preferences');" ng-mouseenter="info.hover = 'preferences'" ng-mouseout="info.hover = ''" ng-class="{ active: info.active == 'preferences' }">
+		<div ng-click="click('help');" ng-class="{ active: info.active == 'help' }">
+			<i class="fa fa-lg fa-question-circle"></i>
+			<div class="dropdown" ng-show="info.active == 'help'">
+				asdf
+			</div>
+		</div>
+
+		<div ng-click="click('preferences');" ng-class="{ active: info.active == 'preferences' }">
 			<i class="fa fa-lg fa-cog" ng-class="{ 'fa-spin': info.hover == 'preferences' || info.active == 'preferences' }"></i>
 			<div class="dropdown" ng-show="info.active == 'preferences'">
 				sadf
 			</div>
 		</div>
 
-		<div ng-click="click('mail');" ng-mouseenter="info.hover = 'mail'" ng-mouseout="info.hover = ''" ng-class="{ active: info.active == 'mail' }">
+		<div ng-click="click('mail');" ng-class="{ active: info.active == 'mail' }">
 			<i class="fa fa-lg fa-envelope"></i>
 			<div class="dropdown" ng-show="info.active == 'mail'">
 				<ul>
@@ -53,6 +60,20 @@
 		</div>
 	</span>
 </section>
+
+<section class="users" ng-controller="users">
+
+</section>
+
+<section class="input" ng-controller="input">
+	<form ng-submit="send()">
+		<input type="text" ng-model="input.value">
+	</form>
+	<div class="emojiIcon"><li class="fa fa-lg fa-smile-o"></li></div>
+</section>
+
+<div ng-controller="chatlog"></div>
+
 
 </body>
 </html>

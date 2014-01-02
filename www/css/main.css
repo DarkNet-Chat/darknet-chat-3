@@ -116,6 +116,41 @@ section.header .right > div .dropdown > ul li:hover {
   color: white;
   background-color: #44aaff;
 }
+section.users {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  width: 150px;
+  bottom: 0;
+  background-color: yellow;
+}
+section.input {
+  position: absolute;
+  height: 40px;
+  left: 150px;
+  right: 0;
+  bottom: 0;
+}
+section.input input {
+  height: 40px;
+  font-size: 22px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  border: 0;
+  outline: none;
+  padding-right: 30px;
+}
+section.input .emojiIcon {
+  position: absolute;
+  right: 5px;
+  bottom: 10px;
+  font-size: 20px;
+  cursor: pointer;
+}
+section.input .emojiIcon:hover {
+  color: #dd8811;
+}
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   * {
     font-family: "HelveticaNeue-Light";

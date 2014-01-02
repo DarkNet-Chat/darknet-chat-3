@@ -14,6 +14,7 @@ var schema = new mongoose.Schema({
 		token: String,
 		expiry: { type: Date, default: 0 }
 	},
+	avatars: [ { index: Number, path: String } ],
 	preferences: {
 		afkMessage: String
 	}

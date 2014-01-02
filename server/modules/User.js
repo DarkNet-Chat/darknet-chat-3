@@ -8,9 +8,35 @@ var JsonFormatter = require("node-cryptojs-aes").JsonFormatter;
 
 exports.User = function()
 {
-	return function(socket)
+	var _all = [ ];
+
+	var getAllUserObjects = function()
 	{
+		var all = [ ];
+		for(var i = 0; i < _all.length; i++)
+		{
+			var u = _all[i].toObject();
+			delete u.auth;
+			delete u.password;
+			delete u.salt;
+			delete u.preferences;
+
+			if(u.avatars.length == 0)
+				u.avatars.push({ index: 0, path: "assvatar.png" });
+
+			all.push(u);
+		}
+
+		return all;
+	}
+
+	return function(socket, _io)
+	{
+		if(!io)
+			io = _io;
+
 		var _token = null;
+		var _username = null;
 
 		socket.on("token", function(token)
 		{
@@ -155,8 +181,45 @@ exports.User = function()
 					delete u.auth;
 					delete u.password;
 					delete u.salt;
+
+					_username = u.username;
+
+					socket.emit("me", u);
 				}
 			})
+		});
+
+		socket.on("join", function()
+		{
+			logging.verbose("User [%s] joining chat", _token);
+			db.users.model.findOne({ "auth.token": _token }, function(error, user)
+			{
+				if(error || !user)
+				{
+					if(error)
+						logging.error("Error getting user for token [%s]", _token, error);
+					logging.warn("Could not get user for token [%s]", _token);
+				}
+				else
+				{
+					user.lastSeen = new Date();
+					user.save();
+
+					_all.push(user);
+
+					socket.emit("join", {
+						title: "",
+						users: getAllUserObjects()
+					})
+				}
+			});
+		});
+
+		socket.on("message", function(message)
+		{
+			logging.verbose("Sending message from [%s]", _username);
+			socket.broadcast.emit("message", { from: _username, message: message });
+			socket.emit("message", { from: _username, message: message });
 		});
 	}
 }();
