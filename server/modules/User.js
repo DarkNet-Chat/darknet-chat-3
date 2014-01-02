@@ -12,7 +12,38 @@ exports.User = function()
 	{
 		socket.on("token", function(token)
 		{
-			console.log(token);
+			logging.verbose("Received authentication attempt with token [%s]", token);
+
+			db.users.model.findOne({ "auth.token": token }, function(error, user)
+			{
+				var authenticated = false;
+				var realToken = "";
+
+				if(error || !user)
+				{
+					if(error)
+						logging.error("Error fetching user", error);
+					logging.warn("No user found with requested token [%s].", token);
+				}
+				else
+				{
+					if(Date.now() < user.auth.expiry.getTime())
+					{
+						authenticated = true;
+						realToken = user.auth.token;
+
+						var expiry = new Date();
+						expiry.setDate(expiry.getDate() + 10);
+						user.auth.expiry = expiry;
+
+						logging.info("Successfully authenticated user [%s] with token [%s]", user.username, user.auth.token);
+					}
+					else
+						logging.info("Token [%s] expired for user [%s]", token, user.username);
+				}
+
+				socket.emit("authenticate", { authenticated: authenticated, method: "token", token: realToken });
+			});
 		});
 
 		socket.on("challenge", function(challenge)
@@ -75,8 +106,7 @@ exports.User = function()
 				}
 				else
 				{
-					console.log(user.auth.sent);
-					key = user.password;
+					var key = user.password;
 
 					var plaintext = CryptoJS.AES.decrypt(response, key, { format: JsonFormatter }).toString(CryptoJS.enc.Utf8);
 
@@ -84,6 +114,10 @@ exports.User = function()
 					if(plaintext == expected)
 					{
 						logging.info("Successfully authenticated user [%s]", username);
+
+						if(user.auth && user.auth.expiry && Date.now() < user.auth.expiry.getTime())
+							token = user.auth.token;
+
 
 						authenticated = true;
 						user.auth.token = token;
@@ -96,7 +130,7 @@ exports.User = function()
 						logging.warn("Authentication challenge for user [%s] does not match expected value", username);
 				}
 
-				socket.emit("authenticate", { authenticated: authenticated, token: token });
+				socket.emit("authenticate", { authenticated: authenticated, method: "credentials", token: token });
 			});
 		});
 	}

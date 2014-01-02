@@ -1,71 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="DarkNetChat">
 <head>
-	<script type="text/javascript" src="http://chat.mudz.me/server/socket.io.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>DarkNet Chat</title>
+	<!--script type="text/javascript" src="http://chat.mudz.me/server/socket.io.js"></script-->
+	<script type="text/javascript" src="http://172.16.70.130:9940/server/socket.io.js"></script>
 	<script type="text/javascript" src="js/crypto.js"></script>
-	<script type="text/javascript">
+	<script type="text/javascript" src="js/jq-ang-bs.js"></script>
+	<script type="text/javascript" src="js/main.js"></script>
 
-	function launch()
-	{
-		var socket = io.connect("ws://chat.mudz.me/", { resource: "server" });
-		socket.on("error", function(e)
-		{
-			console.log("ERROR");
-			console.log(e);
-		});
-		socket.on("connect", function()
-		{
-			socket.on("challenge", function(challenge)
-			{
-				var password = "Yeah, I'm not committing my real password...";
-
-				var bits = password.split("");
-				var offset = 0;
-
-				for(var i = 0; i < bits.length; i++)
-				{
-					var v = bits[i].charCodeAt(0);
-					if((i % 5) == 4)
-						offset = offset / v;
-					else if((i % 5) == 0 || (i % 5) == 3)
-						offset += v;
-					else
-						offset *= v;
-				}
-				offset = Math.round(offset);
-
-				var hpass = SHA256(password);
-
-				for(var i = 0; i < challenge.salt.length; i++)
-				{
-					var uc = challenge.salt.substr(i, 1);
-					var pos = offset % hpass.length;
-					hpass = hpass.substr(0, pos) + uc + hpass.substring(pos);
-					offset -= pos;
-				}
-
-				var key = SHA256(hpass);
-
-				challenge = challenge.challenge;
-				var plaintext = CryptoJS.AES.decrypt(challenge, key, { format: JsonFormatter}).toString(CryptoJS.enc.Utf8);
-
-				var response = plaintext.split("").reverse().join("");
-				response = CryptoJS.AES.encrypt(response, key, { format: JsonFormatter }).toString();
-
-				socket.emit("authenticate", { username: "darkcooger", response: response });
-			});
-
-			socket.emit("challenge", { username: "darkcooger" });
-		});
-		socket.on("disconnect", function(d)
-		{
-			console.log("DISCONNECT");
-			console.log(d);
-		});
-	}
-
-	</script>
+	<link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
-<body onload="launch()">
+<body>
+
+<div class="auth-overlay" ng-controller="auth" ng-show="auth.visible">
+	<div class="container">
+		<table>
+			<tr><td class="name">Username:</td><td class="value"><input type="text" ng-model="auth.username"></td></tr>
+			<tr><td class="name">Password:</td><td class="value"><input type="password" ng-model="auth.password"></td></tr>
+			<tr><td colspan="2"><button ng-click="login()">Login</button> | <button>Forgot Password</button></td></tr>
+		</table>
+		<!--hr-->
+	</div>
+</div>
+
+<section class="header" ng-controller="header">
+	<div class="icon"><img src="images/thundercat.png"></div>
+	<span class="title">
+		<strong>dark</strong>net chat</span>
+	</span>
+
+	<span class="right">
+		<div ng-click="click('preferences');" ng-mouseenter="info.hover = 'preferences'" ng-mouseout="info.hover = ''" ng-class="{ active: info.active == 'preferences' }">
+			<i class="fa fa-lg fa-cog" ng-class="{ 'fa-spin': info.hover == 'preferences' || info.active == 'preferences' }"></i>
+			<div class="dropdown" ng-show="info.active == 'preferences'">
+				sadf
+			</div>
+		</div>
+
+		<div ng-click="click('mail');" ng-mouseenter="info.hover = 'mail'" ng-mouseout="info.hover = ''" ng-class="{ active: info.active == 'mail' }">
+			<i class="fa fa-lg fa-envelope"></i>
+			<div class="dropdown" ng-show="info.active == 'mail'">
+				<ul>
+					<li>asdf</li>
+					<li>asdf</li>
+					<li>asdf</li>
+					<li>asdf</li>
+				</ul>
+			</div>
+		</div>
+	</span>
+</section>
+
 </body>
 </html>

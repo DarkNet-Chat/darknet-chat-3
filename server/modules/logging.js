@@ -1,10 +1,10 @@
 var winston = require("winston");
 
 var consoleTransport = new (winston.transports.Console)({ prettyPrint: true, colorize: true, timestamp: true, level: "verbose" });
-var mongoTransport = new (require("winston-mongodb").MongoDB)({ db: "DarkNetChat", level: 0 });
+//var mongoTransport = new (require("winston-mongodb").MongoDB)({ db: "DarkNetChat", level: 0 });
 
 var logger = new (winston.Logger)({
-        transports: [ consoleTransport, mongoTransport ]
+        transports: [ consoleTransport ]//, mongoTransport ]
 });
 
 var logLevels = {
