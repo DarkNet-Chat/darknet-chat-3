@@ -15,11 +15,13 @@
 
 <div class="auth-overlay" ng-controller="auth" ng-show="auth.visible">
 	<div class="container">
-		<table>
-			<tr><td class="name">Username:</td><td class="value"><input type="text" ng-model="auth.username"></td></tr>
-			<tr><td class="name">Password:</td><td class="value"><input type="password" ng-model="auth.password"></td></tr>
-			<tr><td colspan="2"><button ng-click="login()">Login</button> | <button>Forgot Password</button></td></tr>
-		</table>
+		<form>
+			<table>
+				<tr><td class="name">Username:</td><td class="value"><input type="text" ng-model="auth.username"></td></tr>
+				<tr><td class="name">Password:</td><td class="value"><input type="password" ng-model="auth.password"></td></tr>
+				<tr><td colspan="2"><button ng-click="login()">Login</button> | <button>Forgot Password</button></td></tr>
+			</table>
+		</form>
 		<!--hr-->
 	</div>
 </div>
