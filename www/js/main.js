@@ -219,7 +219,8 @@ var Chat = function()
 			}
 			else
 			{
-				Socket.emit("message", message);
+				if(message != "")
+					Socket.emit("message", message);
 			}
 
 			$scope.input.value = "";
@@ -228,10 +229,28 @@ var Chat = function()
 
 	ChatAngularApp.controller("chatlog", [ "$scope", function($scope)
 	{
+		$scope.log = [ ];
+
+		var cl = $("#chatlog")[0];
+
 		Socket.on("message", function(message)
 		{
-			console.log("GOT MESSAGE");
-			console.log(message);
+			var doScroll = (cl.scrollTop == 0 || (cl.scrollTop == (cl.scrollHeight - cl.offsetHeight)));
+
+			message.time = new Date(message.time);
+			$scope.$apply(function()
+			{
+				if($scope.log.length > 0 && $scope.log[$scope.log.length - 1].type == "user" && $scope.log[$scope.log.length - 1].username == message.from.username)
+					$scope.log[$scope.log.length - 1].messages.push(message);
+				else
+					$scope.log.push({ type: "user", username: message.from.username, avatar: message.from.avatar, color: message.from.color, messages: [ message ]});
+			});
+
+			if(doScroll)
+				setTimeout(function()
+				{
+					cl.scrollTop = cl.scrollHeight;
+				}, 10);
 		});
 	}]);
 

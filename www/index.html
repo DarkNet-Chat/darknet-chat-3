@@ -72,7 +72,22 @@
 	<div class="emojiIcon"><li class="fa fa-lg fa-smile-o"></li></div>
 </section>
 
-<div ng-controller="chatlog"></div>
+<section id="chatlog" class="chatlog lines colorful" ng-controller="chatlog">
+	<div ng-repeat="entry in log">
+		<div class="user" ng-if="entry.type == 'user'">
+			<div class="message">
+				<div class="textContainer" ng-repeat="message in entry.messages">
+					<div class="timestamp">{{ message.time | date:"shortTime" }}</div>
+					<div class="text">{{ message.message }}</div>
+				</div>
+				<img class="avatar" ng-src="avatars/{{ entry.avatar }}">
+				<div class="sender">
+					<span ng-class="entry.color">{{ entry.username }}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
 
 
 </body>

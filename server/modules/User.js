@@ -10,17 +10,43 @@ exports.User = function()
 {
 	var _all = [ ];
 
+	var getCleanUser = function(user, superClean)
+	{
+		var u = user.toObject();
+		delete u.auth;
+		delete u.password;
+		delete u.salt;
+		delete u.avatars;
+
+		if(user.avatars && user.avatars.length > 0)
+		{
+			for(var i = 0; i < user.avatars.length; i++)
+			{
+				if(user.avatars[i].index == 0)
+				{
+					u.avatar = user.avatars[i].path;
+					break;
+				}
+			}
+		}
+		else
+			u.avatar = "assvatar.jpg";
+
+		if(superClean)
+			delete u.preferences;
+
+		return u;
+	}
+
 	var getAllUserObjects = function()
 	{
 		var all = [ ];
 		for(var i = 0; i < _all.length; i++)
 		{
-			var u = _all[i].toObject();
-			delete u.auth;
-			delete u.password;
-			delete u.salt;
-			delete u.preferences;
+			var u = getCleanUser(_all[i], true);
 
+			if(!u.avatars)
+				u.avatars = [ ];
 			if(u.avatars.length == 0)
 				u.avatars.push({ index: 0, path: "assvatar.png" });
 
@@ -28,15 +54,18 @@ exports.User = function()
 		}
 
 		return all;
+	};
+
+	var broadcast = function(socket, message, data)
+	{
+		socket.broadcast.emit(message, data);
+		socket.emit(message, data);
 	}
 
-	return function(socket, _io)
+	return function(socket)
 	{
-		if(!io)
-			io = _io;
-
 		var _token = null;
-		var _username = null;
+		var _user = null;
 
 		socket.on("token", function(token)
 		{
@@ -177,12 +206,8 @@ exports.User = function()
 				}
 				else
 				{
-					var u = user.toObject();
-					delete u.auth;
-					delete u.password;
-					delete u.salt;
-
-					_username = u.username;
+					var u = getCleanUser(user);
+					_user = user;
 
 					socket.emit("me", u);
 				}
@@ -210,16 +235,19 @@ exports.User = function()
 					socket.emit("join", {
 						title: "",
 						users: getAllUserObjects()
-					})
+					});
+
+					socket.broadcast.emit("joined", getCleanUser(user, true));
 				}
 			});
 		});
 
 		socket.on("message", function(message)
 		{
-			logging.verbose("Sending message from [%s]", _username);
-			socket.broadcast.emit("message", { from: _username, message: message });
-			socket.emit("message", { from: _username, message: message });
+			var u = getCleanUser(_user, true);
+
+			logging.verbose("Sending message from [%s]", u.username);
+			broadcast(socket, "message", { from: u, time: (new Date()), message: message });
 		});
 	}
 }();
