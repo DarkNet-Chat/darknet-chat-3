@@ -233,6 +233,22 @@ var Chat = function()
 
 		var cl = $("#chatlog")[0];
 
+		Socket.on("joined", function(user)
+		{
+			$scope.$apply(function()
+			{
+				$scope.log.push({ type: "join", username: user.username, color: user.color, time: new Date(user.joined) });
+			});
+		});
+
+		Socket.on("left", function(user)
+		{
+			$scope.$apply(function()
+			{
+				$scope.log.push({ type: "leave", username: user.username, color: user.color, time: new Date(user.left) });
+			});
+		});
+
 		Socket.on("message", function(message)
 		{
 			var doScroll = (cl.scrollTop == 0 || (cl.scrollTop == (cl.scrollHeight - cl.offsetHeight)));
@@ -268,6 +284,20 @@ var Chat = function()
 				$scope.info.active = menu;
 		};
 	}]);
+
+	ChatAngularApp.directive("noBubble", function()
+	{
+		return {
+			link: function(scope, element, attrs)
+			{
+				element.on("click", function(e)
+				{
+					//e.preventDefault();
+					return false;
+				})
+			}
+		}
+	});
 
 	return {
 		init: init

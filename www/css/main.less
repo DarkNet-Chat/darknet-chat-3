@@ -162,7 +162,7 @@ section.header
 				{
 					padding: 0 10px;
 					list-style-type: none;
-					line-height: 2em;
+					line-height: 1em;
 
 					&:hover
 					{
@@ -229,6 +229,27 @@ section.chatlog
 	bottom: 40px;
 	color: white;
 	overflow: scroll;
+
+	.join, .leave
+	{
+		padding: 0 13px;
+		text-align: center;
+		opacity: 0.6;
+		font-style: italic;
+		font-size: 0.8em;
+
+		.username
+		{
+			font-weight: bold;
+		}
+
+		.timestamp
+		{
+			float: right;
+			font-size: 0.875em;
+			font-style: normal;
+		}
+	}
 }
 
 section.chatlog.lines.colorful
@@ -258,7 +279,7 @@ section.chatlog.lines.colorful
 
 				.text
 				{
-
+					margin-right: 60px;
 				}
 			}
 

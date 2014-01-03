@@ -237,7 +237,9 @@ exports.User = function()
 						users: getAllUserObjects()
 					});
 
-					socket.broadcast.emit("joined", getCleanUser(user, true));
+					var u = getCleanUser(user, true);
+					u.joined = new Date();
+					socket.broadcast.emit("joined", u);
 				}
 			});
 		});
@@ -248,6 +250,13 @@ exports.User = function()
 
 			logging.verbose("Sending message from [%s]", u.username);
 			broadcast(socket, "message", { from: u, time: (new Date()), message: message });
+		});
+
+		socket.on("disconnect", function()
+		{
+			var u = getCleanUser(_user);
+			u.left = new Date();
+			socket.broadcast.emit("left", u);
 		});
 	}
 }();

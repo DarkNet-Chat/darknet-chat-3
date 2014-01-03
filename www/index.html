@@ -42,14 +42,16 @@
 
 		<div ng-click="click('preferences');" ng-class="{ active: info.active == 'preferences' }">
 			<i class="fa fa-lg fa-cog" ng-class="{ 'fa-spin': info.hover == 'preferences' || info.active == 'preferences' }"></i>
-			<div class="dropdown" ng-show="info.active == 'preferences'">
-				sadf
+			<div no-bubble class="dropdown" ng-show="info.active == 'preferences'">
+				<ul>
+					<li><label><input type="checkbox">Show join/leave messages</label></li>
+				</ul>
 			</div>
 		</div>
 
 		<div ng-click="click('mail');" ng-class="{ active: info.active == 'mail' }">
 			<i class="fa fa-lg fa-envelope"></i>
-			<div class="dropdown" ng-show="info.active == 'mail'">
+			<div no-bubble class="dropdown" ng-show="info.active == 'mail'">
 				<ul>
 					<li>asdf</li>
 					<li>asdf</li>
@@ -74,6 +76,14 @@
 
 <section id="chatlog" class="chatlog lines colorful" ng-controller="chatlog">
 	<div ng-repeat="entry in log">
+		<div class="join" ng-if="entry.type == 'join'">
+			<div class="timestamp">{{ entry.time | date:"shortTime" }}</div>
+			<span class="username">{{ entry.username }}</span> has joined chat
+		</div>
+		<div class="leave" ng-if="entry.type == 'leave'">
+			<div class="timestamp">{{ entry.time | date:"shortTime" }}</div>
+			<span class="username">{{ entry.username }}</span> has left chat
+		</div>
 		<div class="user" ng-if="entry.type == 'user'">
 			<div class="message">
 				<div class="textContainer" ng-repeat="message in entry.messages">
