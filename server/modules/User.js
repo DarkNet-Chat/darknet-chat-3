@@ -93,6 +93,9 @@ exports.User = function()
 						var expiry = new Date();
 						expiry.setDate(expiry.getDate() + 10);
 						user.auth.expiry = expiry;
+						user.save();
+
+						_user = user;
 
 						logging.info("Successfully authenticated user [%s] with token [%s]", user.username, user.auth.token);
 					}
@@ -184,6 +187,8 @@ exports.User = function()
 						expiry.setDate(expiry.getDate() + 10);
 						user.auth.expiry = expiry;
 						user.save();
+
+						_user = user;
 					}
 					else
 						logging.warn("Authentication challenge for user [%s] does not match expected value", username);
@@ -195,68 +200,88 @@ exports.User = function()
 
 		socket.on("me", function()
 		{
-			logging.verbose("Getting own information for token [%s]", _token);
-			db.users.model.findOne({ "auth.token": _token }, function(error, user)
-			{
-				if(error || !user)
-				{
-					if(error)
-						logging.error("Error getting user for token [%s]", _token, error);
-					logging.warn("Could not get user for token [%s]", _token);
-				}
-				else
-				{
-					var u = getCleanUser(user);
-					_user = user;
-
-					socket.emit("me", u);
-				}
-			})
+			var u = getCleanUser(_user);
+			socket.emit("me", u);
 		});
 
 		socket.on("join", function()
 		{
-			logging.verbose("User [%s] joining chat", _token);
-			db.users.model.findOne({ "auth.token": _token }, function(error, user)
-			{
-				if(error || !user)
-				{
-					if(error)
-						logging.error("Error getting user for token [%s]", _token, error);
-					logging.warn("Could not get user for token [%s]", _token);
-				}
-				else
-				{
-					user.lastSeen = new Date();
-					user.save();
+			logging.verbose("User [%s] joining chat", _user.username);
 
-					_all.push(user);
+			_user.lastSeen = new Date();
+			_user.save();
 
-					socket.emit("join", {
-						title: "",
-						users: getAllUserObjects()
-					});
+			_all.push(_user);
 
-					var u = getCleanUser(user, true);
-					u.joined = new Date();
-					socket.broadcast.emit("joined", u);
-				}
+			socket.emit("join", {
+				title: "",
+				users: getAllUserObjects()
 			});
+
+			var history = db.history.getLastHundred();
+			for(var i = 0; i < history.length; i++)
+			{
+				var user = getCleanUser(history[i].user, true);
+
+				switch(history[i].type)
+				{
+					case "chat":
+						socket.emit("message", { from: user, time: history[i].timestamp, message: history[i].body });
+						break;
+
+					case "join":
+						user.joined = history[i].timestamp;
+						socket.emit("joined", user);
+						break;
+
+					case "leave":
+						user.left = history[i].timestamp;
+						socket.emit("left", user);
+						break;
+				}
+			}
+
+			var u = getCleanUser(_user, true);
+			u.joined = new Date();
+			broadcast(socket, "joined", u);
+
+			db.history.saveHistory(u.joined, _user, "join", "");
 		});
 
 		socket.on("message", function(message)
 		{
+			var now = new Date();
 			var u = getCleanUser(_user, true);
 
 			logging.verbose("Sending message from [%s]", u.username);
-			broadcast(socket, "message", { from: u, time: (new Date()), message: message });
+			broadcast(socket, "message", { from: u, time: now, message: message });
+
+			db.history.saveHistory(now, _user, "chat", message);
 		});
+
+		socket.on("preference", function(pref)
+		{
+			_user.preferences[pref.name] = pref.value;
+			_user.save();
+		})
 
 		socket.on("disconnect", function()
 		{
 			var u = getCleanUser(_user);
 			u.left = new Date();
 			socket.broadcast.emit("left", u);
+
+			console.log("===== USER HAS LEFT =====");
+			db.history.saveHistory(u.left, _user, "leave", "");
+
+			for(var i = 0; i < _all.length; i++)
+			{
+				if(_all[i]._id == _user._id)
+				{
+					_all.splice(i, 1);
+					break;
+				}
+			}
 		});
 	}
 }();

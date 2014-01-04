@@ -11,8 +11,7 @@
 
 	<link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
-<body>
-
+<body ng-controller="base">
 <div class="auth-overlay" ng-controller="auth" ng-show="auth.visible">
 	<div class="container">
 		<form>
@@ -44,7 +43,9 @@
 			<i class="fa fa-lg fa-cog" ng-class="{ 'fa-spin': info.hover == 'preferences' || info.active == 'preferences' }"></i>
 			<div no-bubble class="dropdown" ng-show="info.active == 'preferences'">
 				<ul>
-					<li><label><input type="checkbox">Show join/leave messages</label></li>
+					<li><label><input type="checkbox" ng-model="preferences.showJoinLeave">Show join/leave messages</label></li>
+					<li><label><input type="checkbox" ng-model="preferences.showTimestamps">Show timestamps</label></li>
+					<li><label><input type="checkbox" ng-disabled="!preferences.showTimestamps" ng-model="preferences.twelveHourTime">12-hour time (AM/PM)</label></li>
 				</ul>
 			</div>
 		</div>
@@ -76,18 +77,17 @@
 
 <section id="chatlog" class="chatlog lines colorful" ng-controller="chatlog">
 	<div ng-repeat="entry in log">
-		<div class="join" ng-if="entry.type == 'join'">
-			<div class="timestamp">{{ entry.time | date:"shortTime" }}</div>
-			<span class="username">{{ entry.username }}</span> has joined chat
-		</div>
-		<div class="leave" ng-if="entry.type == 'leave'">
-			<div class="timestamp">{{ entry.time | date:"shortTime" }}</div>
-			<span class="username">{{ entry.username }}</span> has left chat
+		<div class="join" ng-if="entry.type == 'join' || entry.type == 'leave'" ng-show="preferences.showJoinLeave">
+			<div class="timestamp" ng-show="preferences.showTimestamps && preferences.twelveHourTime">{{ entry.time | date:"h:mm a" }}</div>
+			<div class="timestamp" ng-show="preferences.showTimestamps && !preferences.twelveHourTime">{{ entry.time | date:"H:mm" }}</div>
+			<span ng-if="entry.type == 'join'"><span class="username">{{ entry.username }}</span> has joined chat</span>
+			<span ng-if="entry.type == 'leave'"><span class="username">{{ entry.username }}</span> has left chat</span>
 		</div>
 		<div class="user" ng-if="entry.type == 'user'">
 			<div class="message">
 				<div class="textContainer" ng-repeat="message in entry.messages">
-					<div class="timestamp">{{ message.time | date:"shortTime" }}</div>
+					<div class="timestamp" ng-show="preferences.showTimestamps && preferences.twelveHourTime">{{ message.time | date:"h:mm a" }}</div>
+					<div class="timestamp" ng-show="preferences.showTimestamps && !preferences.twelveHourTime">{{ message.time | date:"H:mm" }}</div>
 					<div class="text">{{ message.message }}</div>
 				</div>
 				<img class="avatar" ng-src="avatars/{{ entry.avatar }}">

@@ -1,5 +1,7 @@
 var Chat = function()
 {
+	var _preferences = { };
+
 	var Socket = function()
 	{
 		var socket = null;
@@ -60,6 +62,45 @@ var Chat = function()
 	};
 
 	var ChatAngularApp = angular.module("DarkNetChat", [ ]);
+
+	ChatAngularApp.controller("base", [ "$scope", function($scope)
+	{
+		$scope.blahblah = "asdf";
+
+		$scope.preferences = { };
+
+		var preferenceWatcher = function(newVal, oldVal)
+		{
+			for(var pref in newVal)
+			{
+				if(newVal[pref] != oldVal[pref])
+				{
+					console.log(pref, "changed");
+					Socket.emit("preference", { name: pref, value: newVal[pref] });
+					break;
+				}
+			}
+		}
+
+		var unwatch = function() { };
+
+		Socket.on("me", function(me)
+		{
+			unwatch();
+
+			$scope.$apply(function()
+			{
+				$scope.preferences.showJoinLeave = me.preferences.showJoinLeave;
+
+				$scope.preferences.showTimestamps = me.preferences.showTimestamps;
+				$scope.preferences.twelveHourTime = me.preferences.twelveHourTime;
+
+				$scope.preferences.afkMessage = me.preferences.afkMessage;
+			});
+
+			unwatch = $scope.$watch("preferences", preferenceWatcher, true);
+		});
+	}]);
 
 	ChatAngularApp.controller("auth", [ "$scope", function($scope)
 	{
@@ -251,6 +292,7 @@ var Chat = function()
 
 		Socket.on("message", function(message)
 		{
+			console.log("message");
 			var doScroll = (cl.scrollTop == 0 || (cl.scrollTop == (cl.scrollHeight - cl.offsetHeight)));
 
 			message.time = new Date(message.time);
@@ -292,8 +334,9 @@ var Chat = function()
 			{
 				element.on("click", function(e)
 				{
+					e.stopPropagation();
 					//e.preventDefault();
-					return false;
+					//return false;
 				})
 			}
 		}

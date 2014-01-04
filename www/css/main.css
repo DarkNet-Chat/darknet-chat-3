@@ -106,7 +106,8 @@ section.header .right > div .dropdown {
   top: 100%;
   right: 0;
   background-color: white;
-  min-width: 150px;
+  min-width: 350px;
+  padding: 10px 0;
 }
 section.header .right > div .dropdown > ul li {
   padding: 0 10px;

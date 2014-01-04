@@ -16,8 +16,11 @@ var schema = new mongoose.Schema({
 	},
 	avatars: [ { index: Number, path: String } ],
 	preferences: {
+		showJoinLeave: Boolean,
+		showTimestamps: Boolean,
+		twelveHourTime: Boolean,
 		afkMessage: String
 	}
 });
 
-exports.model = mongoose.model("User", schema);
+exports.model = mongoose.model("User", schema, "users");
