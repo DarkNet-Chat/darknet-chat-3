@@ -271,7 +271,6 @@ exports.User = function()
 			u.left = new Date();
 			socket.broadcast.emit("left", u);
 
-			console.log("===== USER HAS LEFT =====");
 			db.history.saveHistory(u.left, _user, "leave", "");
 
 			for(var i = 0; i < _all.length; i++)

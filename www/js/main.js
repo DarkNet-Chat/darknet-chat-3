@@ -11,8 +11,8 @@ var Chat = function()
 		return {
 			start: function()
 			{
-				//var socket = io.connect("ws://chat.mudz.me/", { resource: "server" });
-				socket = io.connect("ws://192.168.0.56:9940/", { resource: "server" });
+				//var socket = io.connect("ws://chat.mudz.me/", { resource: "server", reconnect: false });
+				socket = io.connect("ws://192.168.0.56:9940/", { resource: "server", reconnect: false });
 
 				socket.on("connect", function()
 				{
@@ -60,6 +60,17 @@ var Chat = function()
 	{
 		Socket.start();
 	};
+
+	var Parser = function()
+	{
+		return {
+			parse: function(message)
+			{
+				message.time = new Date(message.time);
+				return message;
+			}
+		}
+	}();
 
 	var ChatAngularApp = angular.module("DarkNetChat", [ ]);
 
@@ -292,10 +303,9 @@ var Chat = function()
 
 		Socket.on("message", function(message)
 		{
-			console.log("message");
 			var doScroll = (cl.scrollTop == 0 || (cl.scrollTop == (cl.scrollHeight - cl.offsetHeight)));
 
-			message.time = new Date(message.time);
+			Parser.parse(message);
 			$scope.$apply(function()
 			{
 				if($scope.log.length > 0 && $scope.log[$scope.log.length - 1].type == "user" && $scope.log[$scope.log.length - 1].username == message.from.username)
