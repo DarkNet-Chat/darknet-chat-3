@@ -13,6 +13,9 @@
 
 @headerBackground: #999999;
 
+@userColorRed: #B00;
+@userColorOrange: #D70;
+
 *
 {
 	font-family: "HelveticaNeue";
@@ -229,8 +232,12 @@ section.chatlog
 	bottom: 40px;
 	color: white;
 	overflow: scroll;
+	padding: 5px 0;
+}
 
-	.join, .leave
+section.chatlog.lines.colorful
+{
+	.join
 	{
 		padding: 3px 13px;
 		text-align: center;
@@ -250,10 +257,47 @@ section.chatlog
 			font-style: normal;
 		}
 	}
-}
 
-section.chatlog.lines.colorful
-{
+	.emote
+	{
+		padding: 3px 13px;
+		text-align: center;
+		font-size: 0.8em;
+
+		> span
+		{
+			display: inline-block;
+			margin: 0 80px;
+			padding: 3px 7px;
+			border-radius: 5px;
+			background-color: #BBB;
+			color: black;
+
+			&.red
+			{
+				background-color: @userColorRed;
+				color: white;
+			}
+
+			&.orange
+			{
+				background-color: @userColorOrange;
+				color: white;
+			}
+		}
+
+		.username
+		{
+			font-weight: bold;
+		}
+
+		.timestamp
+		{
+			float: right;
+			font-size: 0.875em;
+		}
+	}
+
 	.user
 	{
 		padding-top: 8px;
@@ -319,13 +363,13 @@ section.chatlog.lines.colorful
 
 					&.red
 					{
-						background-color: #B00;
+						background-color: @userColorRed;
 						color: white;
 					}
 
 					&.orange
 					{
-						background-color: #D70;
+						background-color: @userColorOrange;
 						color: white;
 					}
 				}

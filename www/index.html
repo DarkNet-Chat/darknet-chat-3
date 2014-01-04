@@ -77,12 +77,20 @@
 
 <section id="chatlog" class="chatlog lines colorful" ng-controller="chatlog">
 	<div ng-repeat="entry in log">
+
 		<div class="join" ng-if="entry.type == 'join' || entry.type == 'leave'" ng-show="preferences.showJoinLeave">
 			<div class="timestamp" ng-show="preferences.showTimestamps && preferences.twelveHourTime">{{ entry.time | date:"h:mm a" }}</div>
 			<div class="timestamp" ng-show="preferences.showTimestamps && !preferences.twelveHourTime">{{ entry.time | date:"H:mm" }}</div>
 			<span ng-if="entry.type == 'join'"><span class="username">{{ entry.username }}</span> has joined chat</span>
 			<span ng-if="entry.type == 'leave'"><span class="username">{{ entry.username }}</span> has left chat</span>
 		</div>
+
+		<div class="emote" ng-if="entry.type == 'emote'">
+			<div class="timestamp" ng-show="preferences.showTimestamps && preferences.twelveHourTime">{{ entry.time | date:"h:mm a" }}</div>
+			<div class="timestamp" ng-show="preferences.showTimestamps && !preferences.twelveHourTime">{{ entry.time | date:"H:mm" }}</div>
+			<span ng-class="entry.color"><span class="username">{{ entry.username }}</span>{{ entry.message }}</span>
+		</div>
+
 		<div class="user" ng-if="entry.type == 'user'">
 			<div class="message">
 				<div class="textContainer" ng-repeat="message in entry.messages">

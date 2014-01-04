@@ -67,6 +67,13 @@ var Chat = function()
 			parse: function(message)
 			{
 				message.time = new Date(message.time);
+
+				var testBody = message.message.toUpperCase();
+				if(testBody.substr(0, 4) == "/ME " || testBody.substr(0, 6) == "/ME'S ")
+				{
+					message.emote = message.message.substr(3);
+				}
+
 				return message;
 			}
 		}
@@ -279,46 +286,69 @@ var Chat = function()
 		}
 	}]);
 
-	ChatAngularApp.controller("chatlog", [ "$scope", function($scope)
+	var ScrollAfter = function()
 	{
-		$scope.log = [ ];
-
-		var cl = $("#chatlog")[0];
-
-		Socket.on("joined", function(user)
+		return function(fn)
 		{
-			$scope.$apply(function()
-			{
-				$scope.log.push({ type: "join", username: user.username, color: user.color, time: new Date(user.joined) });
-			});
-		});
-
-		Socket.on("left", function(user)
-		{
-			$scope.$apply(function()
-			{
-				$scope.log.push({ type: "leave", username: user.username, color: user.color, time: new Date(user.left) });
-			});
-		});
-
-		Socket.on("message", function(message)
-		{
+			var cl = $("#chatlog")[0];
 			var doScroll = (cl.scrollTop == 0 || (cl.scrollTop == (cl.scrollHeight - cl.offsetHeight)));
 
-			Parser.parse(message);
-			$scope.$apply(function()
-			{
-				if($scope.log.length > 0 && $scope.log[$scope.log.length - 1].type == "user" && $scope.log[$scope.log.length - 1].username == message.from.username)
-					$scope.log[$scope.log.length - 1].messages.push(message);
-				else
-					$scope.log.push({ type: "user", username: message.from.username, avatar: message.from.avatar, color: message.from.color, messages: [ message ]});
-			});
+			fn();
 
 			if(doScroll)
 				setTimeout(function()
 				{
 					cl.scrollTop = cl.scrollHeight;
 				}, 10);
+		}
+	}();
+
+	ChatAngularApp.controller("chatlog", [ "$scope", function($scope)
+	{
+		$scope.log = [ ];
+
+		Socket.on("joined", function(user)
+		{
+			ScrollAfter(function()
+			{
+				$scope.$apply(function()
+				{
+					$scope.log.push({ type: "join", username: user.username, color: user.color, time: new Date(user.joined) });
+				});
+			});
+		});
+
+		Socket.on("left", function(user)
+		{
+			ScrollAfter(function()
+			{
+				$scope.$apply(function()
+				{
+					$scope.log.push({ type: "leave", username: user.username, color: user.color, time: new Date(user.left) });
+				});
+			});
+		});
+
+		Socket.on("message", function(message)
+		{
+			ScrollAfter(function()
+			{
+				Parser.parse(message);
+				$scope.$apply(function()
+				{
+					if(message.emote)
+					{
+						$scope.log.push({ type: "emote", username: message.from.username, color: message.from.color, message: message.emote, time: message.time });
+					}
+					else
+					{
+						if($scope.log.length > 0 && $scope.log[$scope.log.length - 1].type == "user" && $scope.log[$scope.log.length - 1].username == message.from.username)
+							$scope.log[$scope.log.length - 1].messages.push(message);
+						else
+							$scope.log.push({ type: "user", username: message.from.username, avatar: message.from.avatar, color: message.from.color, messages: [ message ]});
+					}
+				});
+			});
 		});
 	}]);
 

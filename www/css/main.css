@@ -161,24 +161,50 @@ section.chatlog {
   bottom: 40px;
   color: white;
   overflow: scroll;
+  padding: 5px 0;
 }
-section.chatlog .join,
-section.chatlog .leave {
+section.chatlog.lines.colorful .join {
   padding: 3px 13px;
   text-align: center;
   opacity: 0.6;
   font-style: italic;
   font-size: 0.8em;
 }
-section.chatlog .join .username,
-section.chatlog .leave .username {
+section.chatlog.lines.colorful .join .username {
   font-weight: bold;
 }
-section.chatlog .join .timestamp,
-section.chatlog .leave .timestamp {
+section.chatlog.lines.colorful .join .timestamp {
   float: right;
   font-size: 0.875em;
   font-style: normal;
+}
+section.chatlog.lines.colorful .emote {
+  padding: 3px 13px;
+  text-align: center;
+  font-size: 0.8em;
+}
+section.chatlog.lines.colorful .emote > span {
+  display: inline-block;
+  margin: 0 80px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background-color: #BBB;
+  color: black;
+}
+section.chatlog.lines.colorful .emote > span.red {
+  background-color: #bb0000;
+  color: white;
+}
+section.chatlog.lines.colorful .emote > span.orange {
+  background-color: #dd7700;
+  color: white;
+}
+section.chatlog.lines.colorful .emote .username {
+  font-weight: bold;
+}
+section.chatlog.lines.colorful .emote .timestamp {
+  float: right;
+  font-size: 0.875em;
 }
 section.chatlog.lines.colorful .user {
   padding-top: 8px;
@@ -230,11 +256,11 @@ section.chatlog.lines.colorful .user .message .sender span {
   color: black;
 }
 section.chatlog.lines.colorful .user .message .sender span.red {
-  background-color: #B00;
+  background-color: #bb0000;
   color: white;
 }
 section.chatlog.lines.colorful .user .message .sender span.orange {
-  background-color: #D70;
+  background-color: #dd7700;
   color: white;
 }
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
